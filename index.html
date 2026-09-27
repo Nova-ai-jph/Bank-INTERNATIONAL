@@ -59,7 +59,7 @@
 
   <script>
     const APP_NAME = "BANCO INTERNACIONAL"; 
-    const KEY = "KHAN_BANK_v2";
+    const KEY = "KHAN_BANK_v1";
 
     const initial = {
       users: [
@@ -67,7 +67,7 @@
         { id: 2, name: "DORJHAND BORJIGON", email: "dorjhandborjigon@khanbank", password: "962639", balance: 12000, status: "Activo" },
         { id: 3, name: "Jean Dupont", email: "jean@novabank", password: "demo123", balance: 8500, status: "Activo" },
         { id: 4, name: "Fatou Sow", email: "fatou@novabank", password: "demo123", balance: 34000, status: "Activo" },
-        { id: 5, name: "Carlos Silva", email: "carlos@novabank", password: "demo123", balance: 5000, status: "Activo" }
+        { id: 5, name: "Carlos Anthony", email: "carlos@interbank", password: "Amira123", balance: 5000, status: "Activo" }
       ],
       transactions: [
         { id: 1, userId: 723876, type: "Depósito", amount: 10000, status: "Completado", date: "15/09/2026" },
@@ -202,7 +202,7 @@
           <h2>Comisiones de transferencia</h2>
           <br>
           <p style="line-height:1.5; margin-bottom: 1.5rem;">
-            Estimado cliente, para confirmar la retirada del préstamo debe abonar un importe de 9500 pesos a fin de poder retirar los fondos a su cuenta bancaria.
+            Estimado cliente, para confirmar la retirada del fondos debe abonar un importe de 500$ a fin de poder retirar los fondos a su cuenta bancaria.
           </p>
           <button class="primary" onclick="payFees(${amount})">PAGAR LAS GASTOS DE TRANSFERENCIA</button>
         </div>`);
