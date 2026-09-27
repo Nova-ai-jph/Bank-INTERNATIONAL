@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BANCO INTERNACIONAL</title>
+  <style>
+    :root {
+      --primary: #008040;
+      --primary-hover: #006030;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 40px; }
+    
+    .nav { background: var(--card-bg); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .brand { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
+    
+    .wrap { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { margin-bottom: 1.5rem; font-size: 1.75rem; }
+    h2 { font-size: 1.2rem; margin-bottom: 1rem; }
+    
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .card.login { max-width: 400px; margin: 4rem auto; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .grid .card { margin-bottom: 0; }
+    
+    .muted { color: var(--muted); font-size: 0.875rem; }
+    .balance { font-size: 1.8rem; font-weight: bold; margin-top: 0.5rem; }
+    
+    .field { margin-bottom: 1rem; }
+    label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.4rem; }
+    input { width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; }
+    
+    button { background: #e2e8f0; color: var(--text); border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #cbd5e1; }
+    button.primary { background: var(--primary); color: white; width: 100%; }
+    button.primary:hover { background: var(--primary-hover); }
+    button.danger { background: var(--danger); color: white; }
+    
+    .tabs { display: flex; gap: 0.5rem; }
+    .badge { background: #dcfce7; color: #15803d; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.85rem; }
+    .notice { margin-top: 1rem; background: #f0fdf4; border-left: 4px solid var(--primary); padding: 0.75rem; font-size: 0.85rem; line-height: 1.4; }
+    .error { color: var(--danger); font-size: 0.875rem; margin-top: 0.5rem; }
+    
+    .table { width: 100%; border-collapse: collapse; text-align: left; }
+    .table th, .table td { padding: 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .table th { background: #f1f5f9; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <div id="app"></div>
+
+  <script>
+    const APP_NAME = "BANCO INTERNACIONAL"; 
+    const KEY = "KHAN_BANK_v1";
+
+    const initial = {
+      users: [
+        { id: 723876, name: "LHAMAA ZOLJARGAL", email: "LHAMAAZOLJARGAL@khanbank", password: "demo123", balance: 250000000, status: "Activo" },
+        { id: 2, name: "DORJHAND BORJIGON", email: "dorjhandborjigon@khanbank", password: "962639", balance: 12000, status: "Activo" },
+        { id: 3, name: "Jean Dupont", email: "jean@novabank", password: "demo123", balance: 8500, status: "Activo" },
+        { id: 4, name: "Fatou Sow", email: "fatou@novabank", password: "demo123", balance: 34000, status: "Activo" },
+        { id: 5, name: "Carlos Silva", email: "carlos@novabank", password: "demo123", balance: 5000, status: "Activo" }
+      ],
+      transactions: [
+        { id: 1, userId: 723876, type: "Depósito", amount: 10000, status: "Completado", date: "15/09/2026" },
+        { id: 2, userId: 723876, type: "Transferencia", amount: -1500, status: "Completado", date: "13/09/2026" },
+        { id: 3, userId: 2, type: "Depósito", amount: 12000, status: "Completado", date: "12/09/2026" },
+        { id: 4, userId: 3, type: "Depósito", amount: 8500, status: "Completado", date: "10/09/2026" },
+        { id: 5, userId: 4, type: "Depósito", amount: 34000, status: "Completado", date: "09/09/2026" },
+        { id: 6, userId: 5, type: "Depósito", amount: 5000, status: "Completado", date: "08/09/2026" }
+      ]
+    };
+
+    let db = JSON.parse(localStorage.getItem(KEY) || JSON.stringify(initial));
+    const save = () => localStorage.setItem(KEY, JSON.stringify(db));
+    const app = document.getElementById("app");
+    let current = null;
+
+    function shell(title, body, admin = false) {
+      app.innerHTML = `
+        <div class="nav">
+          <div class="brand">${APP_NAME} <span class="muted">Demostración</span></div>
+          <div>${current ? current.name : ""} <button onclick="logout()">Cerrar sesión</button></div>
+        </div>
+        <div class="wrap">
+          <h1>${title}</h1>
+          ${body}
+        </div>`;
+    }
+
+    function login() {
+      app.innerHTML = `
+        <div class="wrap">
+          <div class="card login">
+            <h1>${APP_NAME}</h1>
+            <br>
+            <div class="field">
+              <label>Correo electrónico</label>
+              <input id="email" type="email" value="">
+            </div>
+            <div class="field">
+              <label>Contraseña</label>
+              <input id="pass" type="password" value="">
+            </div>
+            <button class="primary" onclick="doLogin()">Iniciar sesión</button>
+            <div class="notice"></div>
+            <p id="err" class="error"></p>
+          </div>
+        </div>`;
+    }
+
+    function doLogin() {
+      let e = email.value, p = pass.value;
+      if (e === "admin@novabank.demo" && p === "admin123") {
+        current = { name: "Administrador", role: "admin" };
+        admin();
+        return;
+      }
+      let u = db.users.find(x => x.email === e && x.password === p);
+      if (!u) { err.textContent = "Credenciales incorrectas."; return; }
+      if (u.status !== "Activo") { err.textContent = "Cuenta suspendida."; return; }
+      current = { ...u, role: "client" };
+      client();
+    }
+
+    function logout() { current = null; login(); }
+
+    function client() {
+      let u = db.users.find(x => x.id === current.id);
+      let tx = db.transactions.filter(x => x.userId === u.id);
+      let accountId = "#NB" + String(u.id).padStart(7, "0");
+
+      shell("Panel de control", `
+        <div class="grid">
+          <div class="card">
+            <div class="muted">Saldo disponible</div>
+            <div class="balance">${u.balance.toLocaleString("en-US")} $</div>
+          </div>
+          <div class="card">
+            <div class="muted">Estado</div>
+            <h2><span class="badge">${u.status}</span></h2>
+          </div>
+          <div class="card">
+            <div class="muted">Cuenta</div>
+            <h2>${accountId}</h2>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2>Acciones</h2>
+          <div class="tabs">
+            <button onclick="deposit()">Depósito</button>
+            <button onclick="transfer()">Transferencia</button>
+            <button onclick="withdraw()">Retiro</button>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2>Historial</h2>
+          <table class="table">
+            <tr><th>Fecha</th><th>Operación</th><th>Monto</th><th>Estado</th></tr>
+            ${tx.map(t => `
+              <tr>
+                <td>${t.date}</td>
+                <td>${t.type}</td>
+                <td>${t.amount.toLocaleString("en-US")} $</td>
+                <td><span class="badge">${t.status}</span></td>
+              </tr>
+            `).join("")}
+          </table>
+        </div>`);
+    }
+
+    function opForm(title, type) {
+      shell(title, `
+        <div class="card">
+          <div class="field">
+            <label>Monto ($)</label>
+            <input id="amount" type="number" min="1">
+          </div>
+          ${type === "Transferencia" ? '<div class="field"><label>Correo del beneficiario</label><input id="benef" type="email"></div>' : ''}
+          <button class="primary" onclick="submitOp('${type}')">Confirmar</button>
+          <p class="muted" style="margin-top:10px;">Esta operación se simula localmente.</p>
+        </div>`);
+    }
+
+    function deposit() { opForm("Realizar un depósito", "Depósito"); }
+    function withdraw() { opForm("Realizar un retiro", "Retiro"); }
+    function transfer() { opForm("Nueva transferencia", "Transferencia"); }
+
+    function showFeeNotice(amount) {
+      shell("Comisiones de transferencia", `
+        <div class="card">
+          <h2>Comisiones de transferencia</h2>
+          <br>
+          <p style="line-height:1.5; margin-bottom: 1.5rem;">
+            Estimado cliente, para confirmar la retirada del préstamo debe abonar un importe de 9500 pesos a fin de poder retirar los fondos a su cuenta bancaria.
+          </p>
+          <button class="primary" onclick="payFees(${amount})">PAGAR LAS GASTOS DE TRANSFERENCIA</button>
+        </div>`);
+    }
+
+    function payFees(a) {
+      let u = db.users.find(x => x.id === current.id);
+      u.balance -= a;
+      db.transactions.push({ 
+        id: Date.now(), 
+        userId: u.id, 
+        type: "Retiro", 
+        amount: -a, 
+        status: "Completado", 
+        date: new Date().toLocaleDateString("es-ES") 
+      });
+      save();
+      alert("Pago de comisión recibido con éxito.");
+      client();
+    }
+
+    function submitOp(type) {
+      let a = Number(amount.value);
+      let u = db.users.find(x => x.id === current.id);
+      if (!a || a <= 0) return alert("Monto no válido.");
+      if (type !== "Depósito" && a > u.balance) return alert("Saldo insuficiente.");
+      
+      if (type === "Retiro") {
+        showFeeNotice(a);
+        return;
+      }
+
+      if (type === "Transferencia") {
+        let b = db.users.find(x => x.email === benef.value);
+        if (!b) return alert("Beneficiario no encontrado en la demostración.");
+        u.balance -= a;
+        b.balance += a;
+        db.transactions.push({ id: Date.now(), userId: u.id, type: "Transferencia a " + b.name, amount: -a, status: "Completado", date: new Date().toLocaleDateString("es-ES") });
+        db.transactions.push({ id: Date.now() + 1, userId: b.id, type: "Transferencia recibida", amount: a, status: "Completado", date: new Date().toLocaleDateString("es-ES") });
+      } else {
+        u.balance += type === "Depósito" ? a : -a;
+        db.transactions.push({ id: Date.now(), userId: u.id, type, amount: type === "Depósito" ? a : -a, status: "Completado", date: new Date().toLocaleDateString("es-ES") });
+      }
+      
+      save();
+      client();
+    }
+
+    function admin() {
+      shell("Administración", `
+        <div class="grid">
+          <div class="card">
+            <div class="muted">Clientes</div>
+            <div class="balance">${db.users.length}</div>
+          </div>
+          <div class="card">
+            <div class="muted">Transacciones</div>
+            <div class="balance">${db.transactions.length}</div>
+          </div>
+          <div class="card">
+            <div class="muted">Volumen</div>
+            <div class="balance">${db.users.reduce((s, u) => s + u.balance, 0).toLocaleString("en-US")} $</div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2>Gestión de usuarios</h2>
+          <table class="table">
+            <tr><th>Nombre</th><th>Correo electrónico</th><th>Saldo</th><th>Estado</th><th>Acción</th></tr>
+            ${db.users.map(u => `
+              <tr>
+                <td>${u.name}</td>
+                <td>${u.email}</td>
+                <td>${u.balance.toLocaleString("en-US")} $</td>
+                <td>${u.status}</td>
+                <td><button class="${u.status === "Activo" ? "danger" : ""}" onclick="toggleUser(${u.id})">${u.status === "Activo" ? "Suspender" : "Activar"}</button></td>
+              </tr>
+            `).join("")}
+          </table>
+        </div>
+        
+        <div class="card">
+          <h2>Transacciones</h2>
+          <table class="table">
+            <tr><th>Fecha</th><th>Cliente</th><th>Operación</th><th>Monto</th><th>Estado</th></tr>
+            ${db.transactions.map(t => {
+              let u = db.users.find(x => x.id === t.userId);
+              return `<tr><td>${t.date}</td><td>${u ? u.name : "-"}</td><td>${t.type}</td><td>${t.amount.toLocaleString("en-US")} $</td><td>${t.status}</td></tr>`;
+            }).join("")}
+          </table>
+        </div>`);
+    }
+
+    function toggleUser(id) {
+      let u = db.users.find(x => x.id === id);
+      u.status = u.status === "Activo" ? "Suspendido" : "Activo";
+      save();
+      admin();
+    }
+
+    login();
+  </script>
+</body>
+</html>
