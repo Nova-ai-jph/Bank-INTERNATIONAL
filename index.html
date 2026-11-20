@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -58,8 +58,12 @@
   <div id="app"></div>
 
   <script>
-    const APP_NAME = "BANCO INTERNACIONAL"; 
-    const KEY = "KHAN_BANK_v1";
+    const APP_NAME = "BANCO INTERNACIONAL";
+    const CURRENCY = "MXN";
+    const KEY = "BANCO_INTERNACIONAL_MXN_v1";
+
+    const formatMXN = (amount) =>
+      `${Number(amount).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${CURRENCY}`;
 
     const initial = {
       users: [
@@ -71,10 +75,10 @@
       ],
       transactions: [
         { id: 1, userId: 723876, type: "Depósito", amount: 10000, status: "Completado", date: "15/09/2026" },
-        { id: 2, userId: 723876, type: "Transferencia", amount: +30000, status: "Completado", date: "12/11/2026" },
+        { id: 2, userId: 723876, type: "Transferencia", amount: 30000, status: "Completado", date: "12/11/2026" },
         { id: 3, userId: 2, type: "Depósito", amount: 12000, status: "Completado", date: "12/09/2026" },
         { id: 4, userId: 3, type: "Depósito", amount: 8500, status: "Completado", date: "10/09/2026" },
-        { id: 5, userId: 4, type: "Depósito", amount: 250000, status: "Completado", date: "20/11/2026" },
+        { id: 5, userId: 4, type: "Depósito", amount: 250000, status: "Completado", date: "20/11/2026" }
       ]
     };
 
@@ -86,7 +90,7 @@
     function shell(title, body, admin = false) {
       app.innerHTML = `
         <div class="nav">
-          <div class="brand">${APP_NAME} <span class="muted">Demostración</span></div>
+          <div class="brand">${APP_NAME} <span class="muted">Demostración (${CURRENCY})</span></div>
           <div>${current ? current.name : ""} <button onclick="logout()">Cerrar sesión</button></div>
         </div>
         <div class="wrap">
@@ -110,7 +114,7 @@
               <input id="pass" type="password" value="">
             </div>
             <button class="primary" onclick="doLogin()">Iniciar sesión</button>
-            <div class="notice"></div>
+            <div class="notice">Moneda activa: Peso mexicano (MXN)</div>
             <p id="err" class="error"></p>
           </div>
         </div>`;
@@ -141,7 +145,7 @@
         <div class="grid">
           <div class="card">
             <div class="muted">Saldo disponible</div>
-            <div class="balance">${u.balance.toLocaleString("en-US")} $</div>
+            <div class="balance">${formatMXN(u.balance)}</div>
           </div>
           <div class="card">
             <div class="muted">Estado</div>
@@ -170,7 +174,7 @@
               <tr>
                 <td>${t.date}</td>
                 <td>${t.type}</td>
-                <td>${t.amount.toLocaleString("en-US")} $</td>
+                <td>${formatMXN(t.amount)}</td>
                 <td><span class="badge">${t.status}</span></td>
               </tr>
             `).join("")}
@@ -182,12 +186,12 @@
       shell(title, `
         <div class="card">
           <div class="field">
-            <label>Monto ($)</label>
-            <input id="amount" type="number" min="1">
+            <label>Monto (${CURRENCY})</label>
+            <input id="amount" type="number" min="1" step="any">
           </div>
           ${type === "Transferencia" ? '<div class="field"><label>Correo del beneficiario</label><input id="benef" type="email"></div>' : ''}
           <button class="primary" onclick="submitOp('${type}')">Confirmar</button>
-          <p class="muted" style="margin-top:10px;">Esta operación se simula localmente.</p>
+          <p class="muted" style="margin-top:10px;">Esta operación se simula localmente en pesos mexicanos (MXN).</p>
         </div>`);
     }
 
@@ -201,9 +205,9 @@
           <h2>Comisiones de transferencia</h2>
           <br>
           <p style="line-height:1.5; margin-bottom: 1.5rem;">
-            Estimado cliente, para confirmar la retirada del fondos debe abonar un importe de 5600 pesos a fin de poder retirar los fondos a su cuenta bancaria.
+            Estimado cliente, para confirmar la retirada de los fondos debe abonar un importe de 5,600.00 MXN (pesos mexicanos) a fin de poder retirar los fondos a su cuenta bancaria.
           </p>
-          <button class="primary" onclick="payFees(${amount})">PAGAR LAS GASTOS DE TRANSFERENCIA</button>
+          <button class="primary" onclick="payFees(${amount})">PAGAR LOS GASTOS DE TRANSFERENCIA (MXN)</button>
         </div>`);
     }
 
@@ -216,10 +220,10 @@
         type: "Retiro", 
         amount: -a, 
         status: "Completado", 
-        date: new Date().toLocaleDateString("es-ES") 
+        date: new Date().toLocaleDateString("es-MX") 
       });
       save();
-      alert("Pago de comisión recibido con éxito.");
+      alert("Pago de comisión en MXN recibido con éxito.");
       client();
     }
 
@@ -239,11 +243,11 @@
         if (!b) return alert("Beneficiario no encontrado en la demostración.");
         u.balance -= a;
         b.balance += a;
-        db.transactions.push({ id: Date.now(), userId: u.id, type: "Transferencia a " + b.name, amount: -a, status: "Completado", date: new Date().toLocaleDateString("es-ES") });
-        db.transactions.push({ id: Date.now() + 1, userId: b.id, type: "Transferencia recibida", amount: a, status: "Completado", date: new Date().toLocaleDateString("es-ES") });
+        db.transactions.push({ id: Date.now(), userId: u.id, type: "Transferencia a " + b.name, amount: -a, status: "Completado", date: new Date().toLocaleDateString("es-MX") });
+        db.transactions.push({ id: Date.now() + 1, userId: b.id, type: "Transferencia recibida", amount: a, status: "Completado", date: new Date().toLocaleDateString("es-MX") });
       } else {
         u.balance += type === "Depósito" ? a : -a;
-        db.transactions.push({ id: Date.now(), userId: u.id, type, amount: type === "Depósito" ? a : -a, status: "Completado", date: new Date().toLocaleDateString("es-ES") });
+        db.transactions.push({ id: Date.now(), userId: u.id, type, amount: type === "Depósito" ? a : -a, status: "Completado", date: new Date().toLocaleDateString("es-MX") });
       }
       
       save();
@@ -263,7 +267,7 @@
           </div>
           <div class="card">
             <div class="muted">Volumen</div>
-            <div class="balance">${db.users.reduce((s, u) => s + u.balance, 0).toLocaleString("en-US")} $</div>
+            <div class="balance">${formatMXN(db.users.reduce((s, u) => s + u.balance, 0))}</div>
           </div>
         </div>
         
@@ -275,7 +279,7 @@
               <tr>
                 <td>${u.name}</td>
                 <td>${u.email}</td>
-                <td>${u.balance.toLocaleString("en-US")} $</td>
+                <td>${formatMXN(u.balance)}</td>
                 <td>${u.status}</td>
                 <td><button class="${u.status === "Activo" ? "danger" : ""}" onclick="toggleUser(${u.id})">${u.status === "Activo" ? "Suspender" : "Activar"}</button></td>
               </tr>
@@ -289,7 +293,7 @@
             <tr><th>Fecha</th><th>Cliente</th><th>Operación</th><th>Monto</th><th>Estado</th></tr>
             ${db.transactions.map(t => {
               let u = db.users.find(x => x.id === t.userId);
-              return `<tr><td>${t.date}</td><td>${u ? u.name : "-"}</td><td>${t.type}</td><td>${t.amount.toLocaleString("en-US")} $</td><td>${t.status}</td></tr>`;
+              return `<tr><td>${t.date}</td><td>${u ? u.name : "-"}</td><td>${t.type}</td><td>${formatMXN(t.amount)}</td><td>${t.status}</td></tr>`;
             }).join("")}
           </table>
         </div>`);
